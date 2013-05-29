@@ -41,7 +41,9 @@ define(['bonsai'], function (bonsai) {
   }
 
   function start(stage) {
-    console.log('start', stage);
+    var event = { type: 'connect' };
+    stage.post('userevent', { event: event });
+
     if (window.ua.getDevice().type) {
       if (window.DeviceOrientationEvent) {
         window.addEventListener('deviceorientation', function (event) {

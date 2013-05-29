@@ -46,7 +46,7 @@ Pong = (function() {
   /**
    * Constructor for Pong, i.e. a new game of Pong
    */
-  function Pong() {
+  function Pong(users) {
     this.config = defaults;
 
     this.height = this.config.height;
@@ -55,6 +55,7 @@ Pong = (function() {
     this.paddleSpeed = this.config.paddleSpeed;
     this.ballSpeed = this.config.ballSpeed;
 
+    this.users = users;
     this.newGame();
 
   }
@@ -166,16 +167,16 @@ Pong = (function() {
      * calls newRound
      */
     newGame: function() {
-      var game = this;
+      var game = this, userPaddle;
 
-      this.topPaddle = new Paddle(this, true, this.config.topPaddle, {
-        x: this.width /  2,
-        y: this.config.ball.height + this.config.topPaddle.height/2
-      });
-
-      var userPaddle = this.bottomPaddle = new Paddle(this, false, this.config.bottomPaddle, {
+      userPaddle = this.bottomPaddle = new Paddle(this, this.users[0], this.config.bottomPaddle, {
         x: this.width /  2,
         y: this.height - this.config.ball.height - this.config.bottomPaddle.height/2
+      });
+
+      this.topPaddle = new Paddle(this, this.users[1], this.config.topPaddle, {
+        x: this.width /  2,
+        y: this.config.ball.height + this.config.topPaddle.height/2
       });
 
       stage.on('pointermove', function(e) {
@@ -467,37 +468,23 @@ new Rect(0, 0, 200, 100, 10)
   .fill(gradient.linear(0, ['red', 'yellow']))
   .stroke('green', 2)
   .addTo(popup);
-new Text('Go!').attr({
-  textFillColor: 'white', fontFamily: 'Arial', fontSize: 60, x: 50, y: 30
+new Text('Waiting for').attr({
+  textFillColor: 'white', fontFamily: 'Arial', fontSize: 30, x: 30, y: 30
+}).addTo(popup);
+new Text('contender!').attr({
+  textFillColor: 'white', fontFamily: 'Arial', fontSize: 30, x: 30, y: 50
 }).addTo(popup);
 
-// sound
-/*
-audioSprite = new Audio([
-  { src: 'pong.mp3' },
-  { src: 'pong.ogg' }
-]).prepareUserEvent().addTo(stage).on('load', function() {
-  popup.destroy();
-});
-*/
 
-setTimeout(function () {
-  popup.destroy();
-  new Pong().start();
-}, 3000);
+var users = []
+stage.on('connect', function(e) {
+  users.push(e);
+  if (users.length !== 2) return
 
-var timeoutId = null;
-function playSprite(time) {
-  /*
-  audioSprite.play(time);
-  clearTimeout(timeoutId);
-  timeoutId = setTimeout(function() {
-    audioSprite.pause();
+  setTimeout(function() {
+    popup.destroy();
+    new Pong(users).start();
   }, 500);
- */
-}
-
-
-
+});
 
 

@@ -9,12 +9,28 @@ var socketRenderer = function (socket) {
 
 var socket = require('socket.io').listen(4000);
 socket.set('log level', 0);
+var movies = [];
+
+var connections = 0;
 
 socket.sockets.on('connection', function (socket) {
-  var movie = bonsai.run(null, {
-    code: bonsaiCode,
-    plugins: []
-  });
+  var movie;
+  console.log(connections % 2)
+  if (connections % 2 === 0) {
+    movie = bonsai.run(null, {
+      code: bonsaiCode,
+      plugins: []
+    });
+    movies.push(movie);
+  }
+  else {
+    movie = movies[movies.length - 1];
+    console.log('else')
+  }
+  connections++;
+
+
+  movies.push(movie);
 
   movie.runnerContext.on('message', function () {
     socket.emit('message', arguments);
@@ -25,12 +41,11 @@ socket.sockets.on('connection', function (socket) {
   });
 
   socket.on('message', function (msg) {
-    //if (msg.command === 'userevent') console.log(msg);
     movie.runnerContext.notifyRunner(msg);
   });
 
   socket.on('disconnect', function () {
-    movie.destroy();
+    //movie.destroy();
   });
 });
 
