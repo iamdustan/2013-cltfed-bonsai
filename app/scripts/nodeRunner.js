@@ -13,7 +13,6 @@ define(['bonsai'], function (bonsai) {
     init: function () {
       var self = this;
       this.socket.on('message', function(msg) {
-        if (msg[0].command !== 'render') debugger;
         self.emit('message', msg[0]);
       });
     },
@@ -21,6 +20,7 @@ define(['bonsai'], function (bonsai) {
       this.socket.emit('message', message);
     },
     notifyRunner: function (message) {
+      //if (message.command !== 'canRender') console.log(message);
       this.socket.emit('message', message);
     },
     run: function (code) {
@@ -36,18 +36,30 @@ define(['bonsai'], function (bonsai) {
   proto.notifyRunnerAsync = proto.notifyRunner;
   return {
     runnerContext: runnerContext,
-    runnerUrl: 'http://localhost:4000',
+    runnerUrl: '//' + location.hostname + ':4000',
     start: start
   }
 
   function start(stage) {
-    console.log(stage);
-    stage.on('pointerup', function() {
-      console.log('pointerup');
-    });
-    stage.on('keydown', function() {
-      debugger;
-    });
+    console.log('start', stage);
+    if (window.ua.getDevice().type) {
+      if (window.DeviceOrientationEvent) {
+        window.addEventListener('deviceorientation', function (event) {
+          tilt(event.beta, event.gamma);
+        }, true);
+      }
+      else if (window.DeviceMotionEvent) window.addEventListener('devicemotion', function (event) { tilt(event.acceleration.x * 2, event.acceleration.y * 2); }, true);
+    }
+
+    function tilt(x, y) {
+      var event = {
+        type: 'tilt',
+        x: -x,
+        y: y
+      }
+
+      stage.post('userevent', { event: event });
+    }
   }
 
 });

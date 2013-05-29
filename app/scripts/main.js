@@ -12,9 +12,9 @@ require.config({
 });
 
 //require(['demos/starField', 'bonsai'], function (app, bonsai) {
-require(['demos/breakout', 'bonsai'], function (app, bonsai) {
+//require(['demos/breakout', 'bonsai'], function (app, bonsai) {
 // NOTE: halfbaked. doesn't work. require(['demos/cube', 'bonsai'], function (app, bonsai) {
-//require(['nodeRunner', 'bonsai'], function (app, bonsai) {
+require(['nodeRunner', 'bonsai'], function (app, bonsai) {
   'use strict';
   // use app here
   console.log('Running Bonsai %s', bonsai.version);

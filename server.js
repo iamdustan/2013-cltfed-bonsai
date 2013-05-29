@@ -8,6 +8,7 @@ var socketRenderer = function (socket) {
 };
 
 var socket = require('socket.io').listen(4000);
+socket.set('log level', 0);
 
 socket.sockets.on('connection', function (socket) {
   var movie = bonsai.run(null, {
@@ -15,24 +16,16 @@ socket.sockets.on('connection', function (socket) {
     plugins: []
   });
 
-  movie.runnerContext.on('userevent', function () {
-    socket.emit('userevent', arguments);
-  });
-
-  movie.on('pointerdown', function () {
-    console.log(arguments);
-    socket.runnerContext.notifyRunner(arguments);
-  });
-
-  movie.on('userevent', function () {
-    socket.runnerContext.notifyRunner(arguments);
-  });
-
   movie.runnerContext.on('message', function () {
     socket.emit('message', arguments);
   });
 
   movie.on('message', function (msg) {
+    movie.runnerContext.notifyRunner(msg);
+  });
+
+  socket.on('message', function (msg) {
+    //if (msg.command === 'userevent') console.log(msg);
     movie.runnerContext.notifyRunner(msg);
   });
 

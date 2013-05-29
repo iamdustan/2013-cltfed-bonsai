@@ -47,11 +47,6 @@ Pong = (function() {
    * Constructor for Pong, i.e. a new game of Pong
    */
   function Pong() {
-    stage.on('pointerdown', function(e) {
-      debugger;
-      throw Error('poopie');
-    });
-
     this.config = defaults;
 
     this.height = this.config.height;
@@ -171,6 +166,7 @@ Pong = (function() {
      * calls newRound
      */
     newGame: function() {
+      var game = this;
 
       this.topPaddle = new Paddle(this, true, this.config.topPaddle, {
         x: this.width /  2,
@@ -185,6 +181,15 @@ Pong = (function() {
       stage.on('pointermove', function(e) {
         if (e.target !== stage) return;
         userPaddle.x = e.stageX;
+      });
+
+      stage.on('tilt', function(e) {
+        if (Math.abs(e.x) < 3) return false;
+        tilt = Math.floor(e.x);
+
+        if (userPaddle.x + tilt - (userPaddle.width / 2) < 0 ||
+            userPaddle.x + tilt + (userPaddle.width / 2) > game.width) return false;
+        userPaddle.x += tilt;
       });
 
       this.newRound();
@@ -479,7 +484,6 @@ audioSprite = new Audio([
 setTimeout(function () {
   popup.destroy();
   new Pong().start();
-  console.log(stage);
 }, 3000);
 
 var timeoutId = null;
