@@ -1,6 +1,5 @@
 require.config({
   paths: {
-    jquery: '../components/jquery/jquery',
     bonsai: './vendor/bonsai',
     //bonsai: './vendor/bonsai.node'
   },
@@ -12,13 +11,12 @@ require.config({
   }
 });
 
-//require(['starField', 'jquery', 'bonsai'], function (app, $, bonsai) {
-//require(['breakout', 'jquery', 'bonsai'], function (app, $, bonsai) {
-//require(['cube', 'jquery', 'bonsai'], function (app, $, bonsai) {
-require(['nodeRunner', 'jquery', 'bonsai'], function (app, $, bonsai) {
+//require(['demos/starField', 'bonsai'], function (app, $, bonsai) {
+//require(['demos/breakout', 'bonsai'], function (app, $, bonsai) {
+//require(['demos/cube', 'bonsai'], function (app, $, bonsai) {
+require(['nodeRunner', 'bonsai'], function (app, $, bonsai) {
   'use strict';
   // use app here
-  console.log('Running jQuery %s', $().jquery);
   console.log('Running Bonsai %s', bonsai.version);
   var stage;
 
