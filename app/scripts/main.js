@@ -11,16 +11,24 @@ require.config({
   }
 });
 
-//require(['demos/starField', 'bonsai'], function (app, $, bonsai) {
-//require(['demos/breakout', 'bonsai'], function (app, $, bonsai) {
-//require(['demos/cube', 'bonsai'], function (app, $, bonsai) {
-require(['nodeRunner', 'bonsai'], function (app, $, bonsai) {
+//require(['demos/starField', 'bonsai'], function (app, bonsai) {
+require(['demos/breakout', 'bonsai'], function (app, bonsai) {
+// NOTE: halfbaked. doesn't work. require(['demos/cube', 'bonsai'], function (app, bonsai) {
+//require(['nodeRunner', 'bonsai'], function (app, bonsai) {
   'use strict';
   // use app here
   console.log('Running Bonsai %s', bonsai.version);
   var stage;
 
-  if (app.runnerContext) {
+  if (typeof app === 'function') {
+    stage = bonsai
+      .setup({ runnerContext: bonsai.IframeRunnerContext })
+      .run('movie', {
+        code: app,
+        framerate: 50
+      });
+  }
+  else {
     stage = bonsai
       .setup(app)
       .run(document.getElementById('movie'), {
@@ -30,16 +38,6 @@ require(['nodeRunner', 'bonsai'], function (app, $, bonsai) {
       });
 
     app.start(stage);
-  }
-  else {
-    stage = bonsai
-      .setup({ runnerContext: bonsai.IframeRunnerContext })
-      .run('movie', {
-        width: window.outerWidth,
-        height: window.outerHeight,
-        code: app,
-        framerate: 50
-      });
   }
 
   window.stage = stage;

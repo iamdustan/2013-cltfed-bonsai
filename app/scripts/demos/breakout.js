@@ -1,15 +1,74 @@
 /*global define */
 define([], function () {
 
-  document.getElementById('movie').style.background = '#000';
-  document.getElementById('movie').style.height = '350px';
-  document.getElementById('movie').style.width = '500px';
+  var keys = { 37: 'left', 39: 'right', 65: 'a', 83: 's' };
+
+  function dontdoit(e) {
+    if (keys[e.keyCode]) {
+      e.preventDefault();
+      return false;
+    }
+  }
+
+  if (window.ua.getDevice().type) {
+    if (window.DeviceOrientationEvent) {
+      window.addEventListener('deviceorientation', function (event) {
+        tilt(event.beta, event.gamma);
+      }, true);
+    }
+    else if (window.DeviceMotionEvent) {
+      window.addEventListener('devicemotion', function (event) {
+        tilt(event.acceleration.x * 2, event.acceleration.y * 2);
+      }, true);
+    }
+  }
+  var started = false;
+
+  window.onload = function() {
+    var i = 0;
+    function delay() {
+      console.log('delayed', i++);
+      if (typeof window.stage === 'undefined') {
+        return setTimeout(delay, 100);
+      }
+      if (i < 5) return setTimeout(startup, 500);
+      return startup();
+    }
+    delay();
+  };
+
+
+  setTimeout(function () {
+    if (!started) startup();
+  }, 1000)
+
+  function startup() {
+    if (started) return false;
+    started = true;
+    //stage.sendMessage('start', { width: screen.width - 20, height: screen.height - 200 });
+    var d = getDimensions();
+    setTimeout(function () {
+      document.getElementById('movie').style.background = '#000';
+      document.getElementById('movie').style.height = d.height + 'px';
+      document.getElementById('movie').style.width = d.width + 'px';
+    }, 100);
+    stage.sendMessage('start', { width: d.width, height: d.height });
+  }
+
+  function tilt(x, y) {
+    // discard y for now
+    if (typeof window.stage === 'undefined') return;
+
+    stage.sendMessage('tilt', { x: x, y: y});
+  }
+
+  document.addEventListener('keydown', dontdoit);
+  document.addEventListener('keyup', dontdoit);
 
   function movie() {
 
     var Breakout;
     Breakout = (function() {
-
       /**
        * Setup default settings
        */
@@ -38,7 +97,7 @@ define([], function () {
         pieces: bonsai.tools.map(new Array(10), function(piece) {
           return {
             hp: 2,
-            width: (500 / 5) - 8,
+            width: 80,
             height: 20,
             attr: {
               fillColor: '#FF9500',
@@ -61,11 +120,15 @@ define([], function () {
       /**
        * Constructor for Breakout, i.e. a new game of Breakout
        */
-      function Breakout() {
-        this.config = defaults;
+      function Breakout(options) {
+        this.config = bonsai.tools.mixin({}, defaults, options);
 
         this.height = this.config.height;
-        this.width = this.config.width;
+        var width = this.width = this.config.width;
+
+        this.config.pieces.forEach(function(piece) { piece.width = width / 5 - 12 });
+        this.config.ballSpeed = this.config.paddleSpeed = Math.floor(this.height / 80);
+        this.config.paddle.width = width / 6;
 
         this.pieces = this.config.pieces;
 
@@ -102,6 +165,7 @@ define([], function () {
         return function(key) {
           return !!down[key];
         };
+
       })();
 
       /**
@@ -189,9 +253,9 @@ define([], function () {
         newGame: function() {
           var game = this;
           this.pieces = bonsai.tools.map(this.pieces, function(piece, i) {
-            var y = i < 5 ? 20 : 40
+            var y = i < 5 ? 20 : 46
             return new Piece(game, piece, {
-              x: piece.width * (i % 5) + piece.width / 2,
+              x: (piece.width + 6) * (i % 5) + (piece.width / 2),
               y: y
             });
           });
@@ -203,7 +267,19 @@ define([], function () {
 
           stage.on('pointermove', function(e) {
             if (e.target !== stage) return;
+            if (e.stageX - (userPaddle.width / 2) < 0 ||
+                e.stageX + (userPaddle.width / 2) > game.width) return false;
             userPaddle.x = e.stageX;
+          });
+
+          var tilt = 0;
+          stage.on('message:tilt', function(e) {
+            if (Math.abs(e.x) < 3) return false;
+            tilt = Math.floor(e.x);
+
+            if (userPaddle.x + tilt - (userPaddle.width / 2) < 0 ||
+                userPaddle.x + tilt + (userPaddle.width / 2) > game.width) return false;
+            userPaddle.x += tilt;
           });
 
           this.newRound();
@@ -497,34 +573,31 @@ define([], function () {
       textFillColor: 'white', fontFamily: 'Arial', fontSize: 60, x: 50, y: 30
     }).addTo(popup);
 
-    // sound
-   /*
-    audioSprite = new Audio([
-      { src: 'pong.mp3' },
-      { src: 'pong.ogg' }
-    ]).prepareUserEvent().addTo(stage).on('load', function() {
-      popup.destroy();
-      new Pong().start();
-    });
-   */
     popup.destroy();
-    new Breakout().start();
-
-    /*
-    var timeoutId = null;
-    function playSprite(time) {
-      audioSprite.play(time);
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(function() {
-        audioSprite.pause();
-      }, 500);
-    }
-    */
-
+    stage.on('message:start', function(options) {
+      game = new Breakout(options).start();
+    });
   }
 
 
   return movie;
 
 });
+
+function getDimensions() {
+  var width = 0, height = 0;
+  if (typeof window.innerWidth === 'number') {
+    height = window.innerHeight;
+    width = window.innerWidth;
+  }
+  else if (document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)) {
+    height = document.documentElement.clientHeight;
+    width = document.documentElement.clientWidth;
+  }
+  else if (document.body && (document.body.clientWidth || document.body.clientHeight)) {
+    height = document.body.clientHeight;
+    width = document.body.clientWidth;
+  }
+  return { width: width, height: height };
+}
 

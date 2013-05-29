@@ -1,8 +1,6 @@
 body {
     background: #fafafa;
+    padding: 0;
+    margin: 0;
 }
 
-.hero-unit {
-    margin: 50px auto 0 auto;
-    width: 300px;
-}

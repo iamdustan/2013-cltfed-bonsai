@@ -9,9 +9,17 @@
         <title></title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <meta name="apple-mobile-web-app-title" content="CltFED Bonsai Demos">
+
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
         <link rel="stylesheet" href="styles/main.css">
-        <script src="//localhost:4000/socket.io/socket.io.js"></script>
+        <script src="/scripts/vendor/ua-parser.js"></script>
+        <script>
+          var ua = new UAParser();
+          document.write('<script src="//' + location.hostname + ':4000/socket.io/socket.io.js"><\/scr' + 'ipt>');
+        </script>
     </head>
     <body>
         <div class="container">
