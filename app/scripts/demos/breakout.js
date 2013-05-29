@@ -59,7 +59,7 @@ define([], function () {
     // discard y for now
     if (typeof window.stage === 'undefined') return;
 
-    stage.sendMessage('tilt', { x: x, y: y});
+    stage.sendMessage('tilt', { x: -x, y: y});
   }
 
   document.addEventListener('keydown', dontdoit);
