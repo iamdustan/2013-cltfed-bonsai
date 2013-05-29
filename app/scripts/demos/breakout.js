@@ -435,12 +435,6 @@ define([], function () {
         isAtLeftWall: function() {
           return this.x - this.width/2 <= 0;
         },
-        /**
-         * If the paddle is currently touching the top wall
-         */
-        isAtTopWall: function() {
-          return this.y - this.height/2 <= 0;
-        }
 
       };
 
@@ -507,7 +501,7 @@ define([], function () {
          * If the ball is currently at the top
          */
         isAtTop: function() {
-          return this.y + this.height/2 <= 0;
+          return this.y <= 0;
         },
 
         /**
@@ -544,7 +538,11 @@ define([], function () {
             this.deltaX = -this.deltaX;
           }
 
-          if ( this.isAtBottom() || this.isAtTop() ) {
+          if ( this.isAtTop() ) {
+            this.deltaY = -this.deltaY;
+          }
+
+          if ( this.isAtBottom() ) {
             this.breakout.newRound();
             return;
           }
