@@ -167,30 +167,32 @@ Pong = (function() {
      * calls newRound
      */
     newGame: function() {
-      var game = this, userPaddle;
+      var game = this, paddles = new Array(2);
 
-      userPaddle = this.bottomPaddle = new Paddle(this, this.users[0], this.config.bottomPaddle, {
+      paddles[0] = this.bottomPaddle = new Paddle(this, false, this.config.bottomPaddle, {
         x: this.width /  2,
         y: this.height - this.config.ball.height - this.config.bottomPaddle.height/2
       });
 
-      this.topPaddle = new Paddle(this, this.users[1], this.config.topPaddle, {
+      paddles[1] = this.topPaddle = new Paddle(this, false, this.config.topPaddle, {
         x: this.width /  2,
         y: this.config.ball.height + this.config.topPaddle.height/2
       });
 
       stage.on('pointermove', function(e) {
         if (e.target !== stage) return;
-        userPaddle.x = e.stageX;
+
+        paddles[e.user].x = e.stageX;
       });
 
       stage.on('tilt', function(e) {
         if (Math.abs(e.x) < 3) return false;
         tilt = Math.floor(e.x);
+        var paddle = paddles[e.user];
 
-        if (userPaddle.x + tilt - (userPaddle.width / 2) < 0 ||
-            userPaddle.x + tilt + (userPaddle.width / 2) > game.width) return false;
-        userPaddle.x += tilt;
+        if (paddle.x + tilt - (paddle.width / 2) < 0 ||
+            paddle.x + tilt + (paddle.width / 2) > game.width) return false;
+        paddle.x += tilt;
       });
 
       this.newRound();

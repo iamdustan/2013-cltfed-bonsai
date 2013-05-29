@@ -8,19 +8,28 @@ define(['bonsai'], function (bonsai) {
     this.socket = io.connect(runnerUrl);
   };
 
+  var user = null;
   // some boilerplate to connext via socket.io
   var proto = runnerContext.prototype = bonsai.tools.mixin({
     init: function () {
       var self = this;
+      this.socket.on('user', function(i) {
+        console.log('you are user', i);
+        user = i;
+      });
       this.socket.on('message', function(msg) {
         self.emit('message', msg[0]);
       });
     },
     notify: function (message) {
+      if (message.data) message.data.user = user;
+      else message.user = user;
       this.socket.emit('message', message);
     },
     notifyRunner: function (message) {
-      //if (message.command !== 'canRender') console.log(message);
+      if (message.data && message.data.event) message.data.event.user = user;
+      else message.user = user;
+      if (message.command !== 'canRender') console.log(message);
       this.socket.emit('message', message);
     },
     run: function (code) {
@@ -57,7 +66,8 @@ define(['bonsai'], function (bonsai) {
       var event = {
         type: 'tilt',
         x: -x,
-        y: y
+        y: y,
+        user: user
       }
 
       stage.post('userevent', { event: event });

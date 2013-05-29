@@ -27,8 +27,7 @@ socket.sockets.on('connection', function (socket) {
     movie = movies[movies.length - 1];
     console.log('else')
   }
-  connections++;
-
+  socket.emit('user', connections % 2);
 
   movies.push(movie);
 
@@ -47,5 +46,7 @@ socket.sockets.on('connection', function (socket) {
   socket.on('disconnect', function () {
     //movie.destroy();
   });
+
+  connections++;
 });
 
