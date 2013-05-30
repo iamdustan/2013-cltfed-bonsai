@@ -14,7 +14,6 @@ define(['bonsai'], function (bonsai) {
     init: function () {
       var self = this;
       this.socket.on('user', function(i) {
-        console.log('you are user', i);
         user = i;
       });
       this.socket.on('message', function(msg) {
@@ -29,7 +28,6 @@ define(['bonsai'], function (bonsai) {
     notifyRunner: function (message) {
       if (message.data && message.data.event) message.data.event.user = user;
       else message.user = user;
-      if (message.command !== 'canRender') console.log(message);
       this.socket.emit('message', message);
     },
     run: function (code) {
@@ -49,7 +47,7 @@ define(['bonsai'], function (bonsai) {
     start: start
   }
 
-  function start(stage) {
+  function start(stage, d) {
     var event = { type: 'connect' };
     stage.post('userevent', { event: event });
 
@@ -72,6 +70,10 @@ define(['bonsai'], function (bonsai) {
 
       stage.post('userevent', { event: event });
     }
+
+    var r = stage.renderer.svg.root;
+    r.setAttribute('width', '100%')
+    r.setAttribute('height', '100%')
   }
 
 });
